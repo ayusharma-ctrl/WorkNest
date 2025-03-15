@@ -1,7 +1,7 @@
 
 generator client {
     provider = "prisma-client-js"
-    previewFeatures = ["jsonProtocol]
+    previewFeatures = ["jsonProtocol"]
     binaryTargets = ["native", "linux-arm64-openssl-1.0.x"]
 }
 
