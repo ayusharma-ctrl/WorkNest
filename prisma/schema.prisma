@@ -1,0 +1,162 @@
+
+generator client {
+    provider = "prisma-client-js"
+    previewFeatures = ["jsonProtocol]
+    binaryTargets = ["native", "linux-arm64-openssl-1.0.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Necessary for Next auth - Account and Session table
+model Account {
+    id                       String  @id @default(cuid())
+    userId                   String
+    type                     String
+    provider                 String
+    providerAccountId        String
+    refresh_token            String?
+    access_token             String?
+    expires_at               Int?
+    token_type               String?
+    scope                    String?
+    id_token                 String?
+    session_state            String?
+    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    refresh_token_expires_in Int?
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String    @id @default(uuid())
+    name          String?
+    email         String    @unique
+    password      String?
+    emailVerified DateTime?
+    image         String?
+    preferences   Json?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime?  @updatedAt
+
+    // Relationships
+    createdProjects Project[]       @relation("ProjectOwner")
+    memberships     ProjectMember[]
+    createdTasks    Task[]
+    assignedTasks   Task[]          @relation("AssignedTasks")
+    taggedTasks     TaskTag[]
+    invitations     Invitation[]    @relation("InvitedBy")
+
+    // NextAuth relations
+    accounts Account[]
+    sessions Session[]
+}
+
+model Project {
+    id          String   @id @default(uuid())
+    name        String
+    description String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relationships
+    ownerId     String
+    owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+    members     ProjectMember[]
+    tasks       Task[]
+    invitations Invitation[]
+}
+
+enum UserRoles {
+    ADMIN
+    MEMBER
+}
+
+model ProjectMember {
+    id        String    @id @default(cuid())
+    projectId String
+    project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    role      UserRoles @default(MEMBER)
+    joinedAt  DateTime  @default(now())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@unique([projectId, userId])
+}
+
+enum InviteStatus {
+    PENDING
+    ACCEPTED
+    REVOKED
+}
+
+model Invitation {
+    id        String       @id @default(cuid())
+    projectId String
+    project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    inviterId String
+    inviter   User         @relation("InvitedBy", fields: [inviterId], references: [id], onDelete: Cascade)
+    email     String
+    status    InviteStatus @default(PENDING)
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+
+    @@unique([projectId, email])
+}
+
+enum ProjectPriority {
+    LOW
+    MEDIUM
+    HIGH
+    URGENT
+}
+
+enum ProjectStatus {
+    TODO
+    IN_PROGRESS
+    DONE
+    BACKLOG
+}
+
+model Task {
+    id          String          @id @default(cuid())
+    title       String
+    description String?
+    priority    ProjectPriority @default(LOW)
+    status      ProjectStatus   @default(DONE)
+    deadline    DateTime
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+
+    // Relationships
+    projectId    String
+    project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById  String
+    createdBy    User      @relation(fields: [createdById], references: [id])
+    assignedToId String?
+    assignedTo   User?     @relation("AssignedTasks", fields: [assignedToId], references: [id])
+    tags         TaskTag[]
+}
+
+model TaskTag {
+    id       String   @id @default(cuid())
+    taskId   String
+    task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    userId   String
+    user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    taggedAt DateTime @default(now())
+
+    @@unique([taskId, userId])
+}
