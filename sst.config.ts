@@ -15,6 +15,7 @@ export default {
         environment: {
           DATABASE_URL: process.env.DATABASE_URL!,
           AUTH_SECRET: process.env.AUTH_SECRET!,
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL!,
           AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID!,
           AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET!,
         }

@@ -43,6 +43,7 @@ export const authConfig = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  trustHost: process.env.NEXTAUTH_URL === "https://d1y7b99mgepb4k.cloudfront.net",
   adapter: PrismaAdapter(db),
   callbacks: {
     session: ({ session, user }) => ({
