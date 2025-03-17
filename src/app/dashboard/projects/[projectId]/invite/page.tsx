@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -22,23 +22,37 @@ const inviteFormSchema = z.object({
 type InviteFormValues = z.infer<typeof inviteFormSchema>
 
 interface InvitePageProps {
-    params: {
-        projectId: string
-    }
+    params: Promise<{ projectId: string }>
 }
 
 export default function InvitePage({ params }: InvitePageProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [projectId, setProjectId] = useState<string>("");
 
-    
+    useEffect(() => {
+        const getId = async () => {
+            try {
+                const { projectId } = await params;
+                if (!projectId) {
+                    router.push('/dashboard');
+                    return;
+                }
+                setProjectId(projectId);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        void getId();
+    }, [params, router]);
+
     // server fucntion to sent project invite
     const inviteMember = api.project.inviteMember.useMutation({
         onSuccess: () => {
             toast.success("Invitation sent", {
                 description: "An invitation has been sent to the email address.",
             });
-            router.push(`/dashboard/projects/${params.projectId}/members`);
+            router.push(`/dashboard/projects/${projectId}/members`);
         },
         onError: (error) => {
             toast.error("Error", {
@@ -62,7 +76,7 @@ export default function InvitePage({ params }: InvitePageProps) {
     const onSubmit = (data: InviteFormValues) => {
         setIsLoading(true)
         inviteMember.mutate({
-            projectId: params.projectId,
+            projectId: projectId,
             email: data.email,
         })
     }

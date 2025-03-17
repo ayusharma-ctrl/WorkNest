@@ -57,15 +57,19 @@ export default function ProjectSettingsPage({ params }: ProjectSettingsPageProps
 
     useEffect(() => {
         const getId = async () => {
-            const { projectId } = await params;
-            if (!projectId) {
-                router.push('/dashboard/projects');
-                return;
+            try {
+                const { projectId } = await params;
+                if (!projectId) {
+                    router.push('/dashboard/projects');
+                    return;
+                }
+                setProjectId(projectId);
+            } catch(e) {
+                console.log(e);
             }
-            setProjectId(projectId);
         }
-        getId();
-    }, [params]);
+        void getId();
+    }, [params, router]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleteLoading, setIsDeleteLoading] = useState(false);

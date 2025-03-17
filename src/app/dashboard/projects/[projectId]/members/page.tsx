@@ -11,14 +11,12 @@ import { MembersList } from "@/components/project/MembersList";
 
 
 interface MembersPageProps {
-    params: {
-        projectId: string
-    }
+    params: Promise<{ projectId: string }>;
 }
 
 export default async function MembersPage({ params }: MembersPageProps) {
     const session = await auth();
-    const { projectId } = params;
+    const { projectId } = await params;
 
     if (!session || !projectId) {
         redirect("/");

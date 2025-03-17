@@ -53,7 +53,7 @@ const taskFormSchema = z.object({
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 
-export function EditTaskDialog({ open, onOpenChange, task, projectId, members, onUpdate }: EditTaskDialogProps) {
+export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: EditTaskDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     // method to update task data in db
