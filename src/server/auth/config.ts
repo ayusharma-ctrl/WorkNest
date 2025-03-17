@@ -44,13 +44,17 @@ export const authConfig = {
      */
   ],
   trustHost: process.env.NEXTAUTH_URL === "https://d1y7b99mgepb4k.cloudfront.net",
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.AUTH_SECRET,
   adapter: PrismaAdapter(db),
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: user.id,
+        id: token.sub,
       },
     }),
   },

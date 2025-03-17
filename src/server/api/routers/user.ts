@@ -4,8 +4,13 @@ import {
     createTRPCRouter,
     protectedProcedure,
 } from "@/server/api/trpc";
+import { TRPCError } from "@trpc/server";
 
 export const userRouter = createTRPCRouter({
+
+    getSession: protectedProcedure.query(({ ctx }) => {
+        return ctx.session
+    }),
 
     getUserInfo: protectedProcedure.query(async ({ ctx }) => {
         const userInfo = await ctx.db.user.findUnique({
@@ -14,23 +19,68 @@ export const userRouter = createTRPCRouter({
         return userInfo;
     }),
 
-    // create: protectedProcedure
-    //   .input(z.object({ name: z.string().min(1) }))
-    //   .mutation(async ({ ctx, input }) => {
-    //     return ctx.db.post.create({
-    //       data: {
-    //         name: input.name,
-    //         createdBy: { connect: { id: ctx.session.user.id } },
-    //       },
-    //     });
-    //   }),
+    getPreferences: protectedProcedure.query(async ({ ctx }) => {
+        const user = await ctx.db.user.findUnique({
+            where: {
+                id: ctx.session.user.id,
+            },
+            select: {
+                preferences: true,
+            },
+        });
 
-    // getLatest: protectedProcedure.query(async ({ ctx }) => {
-    //   const post = await ctx.db.post.findFirst({
-    //     orderBy: { createdAt: "desc" },
-    //     where: { createdBy: { id: ctx.session.user.id } },
-    //   });
+        if (!user) {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Task not found",
+            });
+        }
 
-    //   return post ?? null;
-    // }),
+        return (user?.preferences as { darkMode?: boolean }) || {};
+    }),
+
+    updatePreferences: protectedProcedure
+        .input(
+            z.object({
+                preferences: z
+                    .object({
+                        darkMode: z.boolean().optional(),
+                    })
+                    .optional(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const user = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                select: {
+                    preferences: true,
+                },
+            })
+
+            if (!user) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                })
+            }
+
+            // Merge existing preferences with new ones
+            const currentPreferences = (user.preferences as Record<string, unknown>) || {}
+            const updatedPreferences = {
+                ...currentPreferences,
+                ...input.preferences,
+            }
+
+            return ctx.db.user.update({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                data: {
+                    preferences: updatedPreferences,
+                },
+            })
+        }),
+
 });
