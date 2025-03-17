@@ -2,10 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET! });
-    const isAuthenticated = !!token;
+    const token = await getToken({ 
+        req, 
+        secret: process.env.AUTH_SECRET!,
+        cookieName: "next-auth.session-token",
+    });
 
+    const isAuthenticated = !!token;
     const path = req.nextUrl.pathname;
+
     const publicPaths = ["/", "/organizing-projects-animate.svg", "/feedback-animate.svg"]; // including svgs
     const isPublicPath = publicPaths.includes(path) || path.startsWith("/api/");
 

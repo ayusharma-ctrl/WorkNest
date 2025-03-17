@@ -6,7 +6,6 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 import { AuthProvider } from "@/components/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "WorkNest",
@@ -22,7 +21,6 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <TRPCReactProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               {children}
               <Toaster
                 toastOptions={{
@@ -31,7 +29,6 @@ export default function RootLayout({
                   },
                 }}
               />
-            </ThemeProvider>
           </TRPCReactProvider>
         </AuthProvider>
       </body>
