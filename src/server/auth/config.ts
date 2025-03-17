@@ -60,13 +60,13 @@ export const authConfig = {
   },
   cookies: {
     sessionToken: {
-      name: "next-auth.session-token",
+      name: "__Secure-authjs.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
         secure: true,
-        domain: ".cloudfront.net",
+        domain: "d1y7b99mgepb4k.cloudfront.net",
       }
     }
   },
