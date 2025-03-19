@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { api } from "@/trpc/react";
-import { useSession } from "next-auth/react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Button } from "@/components/ui/button";
@@ -21,9 +20,8 @@ const settingsFormSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsFormSchema>
 
 export default function SettingsPage() {
-    const { theme, setTheme } = useTheme();
+    const { setTheme } = useTheme();
     const [isLoading, setIsLoading] = useState(false);
-    const { data: session } = useSession();
 
     // Get user preferences from server action
     const { data: userPreferences } = api.user.getPreferences.useQuery();
@@ -42,29 +40,25 @@ export default function SettingsPage() {
             });
             setIsLoading(false);
         },
-    })
-
-    // Get user preferences from session
-    // const userPreferences = (preferences as { darkMode?: boolean }) || {}
-    
+    });
 
     // form state
     const form = useForm<SettingsFormValues>({
         resolver: zodResolver(settingsFormSchema),
         defaultValues: {
-            darkMode: userPreferences?.darkMode ?? theme === "dark",
+            darkMode: false,
         },
     });
 
 
     // Update form when session/theme changes
     useEffect(() => {
-        if (session?.user) {
+        if (userPreferences?.darkMode !== undefined) {
             form.reset({
-                darkMode: userPreferences?.darkMode ?? theme === "dark",
+                darkMode: userPreferences.darkMode, // either true or false
             });
         }
-    }, [session, theme, form, userPreferences?.darkMode]);
+    }, [form, userPreferences?.darkMode]);
 
 
     // handle form submit to update prefereneces

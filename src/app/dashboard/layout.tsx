@@ -23,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     return (
         <div className="flex min-h-screen flex-col">
             <header className="sticky top-0 z-40 border-b bg-background px-6 lg:px-12">
-                <div className="container flex h-16 items-center justify-between py-4">
+                <div className="flex h-16 items-center justify-between py-4">
                     <div className="flex items-center gap-2 md:hidden">
                         <MobileNav />
                     </div>
@@ -36,7 +36,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 </div>
             </header>
             <div className="flex-1 items-start md:grid md:grid-cols-[220px_1fr] md:gap-6 lg:grid-cols-[240px_1fr]">
-                <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r md:sticky md:block">
+                <aside className="fixed top-14 z-30 -ml-2 hidden h-full w-full shrink-0 overflow-y-auto border-r md:sticky md:block">
                     <DashboardNav />
                 </aside>
                 <main className="flex w-full flex-col overflow-hidden px-4 md:pr-8 md:py-8">{children}</main>

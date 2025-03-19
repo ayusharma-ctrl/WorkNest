@@ -19,7 +19,7 @@ export function DashboardNav() {
                     <Button
                         key={index}
                         variant="ghost"
-                        className={cn("justify-start", pathname === item.href && "bg-slate-200 font-medium")}
+                        className={cn("justify-start", (pathname === item.href || (item.href === "/dashboard/projects" && pathname.startsWith("/dashboard/projects"))) && "bg-slate-200 dark:bg-gray-500 font-medium")}
                         asChild
                     >
                         <Link href={item.href}>

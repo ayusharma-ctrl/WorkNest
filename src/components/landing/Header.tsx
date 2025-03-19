@@ -34,17 +34,17 @@ export const Header = () => {
 
     return (
         <header className="sticky top-0 z-40 w-full px-6 lg:px-12 lg:py-2 border-b bg-transparent backdrop-blur-md">
-            <div className="container flex h-16 items-center justify-between py-4">
+            <div className="flex h-16 items-center justify-between py-4">
                 <div className="flex items-center gap-2">
                     <Link href="/" className="flex items-center space-x-2">
                         <span className="text-xl font-bold">WorkNest</span>
                     </Link>
                 </div>
                 <nav className="flex items-center gap-4">
-                    <Link href="#features" className="text-sm font-medium hover:underline">
+                    <Link href="#features" className="text-sm font-medium hover:underline hidden md:block">
                         Features
                     </Link>
-                    <Link href="#feedbacks" className="text-sm font-medium hover:underline">
+                    <Link href="#feedbacks" className="text-sm font-medium hover:underline hidden md:block">
                         Feedbacks
                     </Link>
                     {/* <Link href="/pricing" className="text-sm font-medium hover:underline">
