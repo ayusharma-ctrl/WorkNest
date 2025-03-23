@@ -25,6 +25,9 @@ import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { type EditTaskDialogProps } from "@/lib/types";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 const taskFormSchema = z.object({
@@ -49,6 +52,7 @@ const taskFormSchema = z.object({
         required_error: "Please select a deadline date.",
     }),
     assignedToId: z.string().optional(),
+    taggedUserIds: z.array(z.string()).optional(),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -62,8 +66,9 @@ export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: 
             toast.success("Task updated", {
                 description: "Your task has been updated successfully.",
             });
-            onUpdate(data);
+            if (data) onUpdate(data);
             onOpenChange(false);
+            setIsLoading(false);
         },
         onError: (error) => {
             toast.error("Error", {
@@ -72,6 +77,9 @@ export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: 
             setIsLoading(false);
         },
     });
+
+    // get current tagged users
+    const currentTaggedUserIds = task?.tags ? task.tags.map((tag) => tag?.userId) : [];
 
     // edit task form state
     const form = useForm<TaskFormValues>({
@@ -83,6 +91,7 @@ export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: 
             status: task.status,
             deadline: new Date(task.deadline),
             assignedToId: task.assignedToId ?? "",
+            taggedUserIds: currentTaggedUserIds,
         },
     });
 
@@ -96,6 +105,7 @@ export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: 
                 status: task.status,
                 deadline: new Date(task.deadline),
                 assignedToId: task.assignedToId ?? "",
+                taggedUserIds: currentTaggedUserIds,
             })
         }
     }, [task, form, open]);
@@ -111,13 +121,14 @@ export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: 
             status: data.status,
             deadline: data.deadline,
             assignedToId: data.assignedToId === "unassigned" ? undefined : data.assignedToId,
+            taggedUserIds: data.taggedUserIds ?? [],
         });
     }
-    
+
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[600px] h-4/5 overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Edit Task</DialogTitle>
                     <DialogDescription>Update the task details below.</DialogDescription>
@@ -257,6 +268,52 @@ export function EditTaskDialog({ open, onOpenChange, task, members, onUpdate }: 
                                 )}
                             />
                         </div>
+                        <FormField
+                            control={form.control}
+                            name="taggedUserIds"
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel>Tag Team Members</FormLabel>
+                                    <ScrollArea className="h-[200px] border rounded-md p-4">
+                                        <div className="space-y-4">
+                                            {members.filter(member => member.userId !== task.createdById && member.userId !== task.assignedToId).map((member) => (
+                                                <FormField
+                                                    key={member.id}
+                                                    control={form.control}
+                                                    name="taggedUserIds"
+                                                    render={({ field }) => {
+                                                        return (
+                                                            <FormItem key={member.userId} className="flex flex-row items-start space-x-3 space-y-0">
+                                                                <FormControl>
+                                                                    <Checkbox
+                                                                        checked={field.value?.includes(member.userId)}
+                                                                        onCheckedChange={(checked) => {
+                                                                            const currentValue = field.value ?? []
+                                                                            return checked
+                                                                                ? field.onChange([...currentValue, member.userId])
+                                                                                : field.onChange(currentValue.filter((value) => value !== member.userId))
+                                                                        }}
+                                                                    />
+                                                                </FormControl>
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Avatar className="h-6 w-6">
+                                                                        <AvatarImage src={member.user.image ?? ""} alt={member.user.name ?? "User"} />
+                                                                        <AvatarFallback>{member.user.name?.charAt(0) ?? "U"}</AvatarFallback>
+                                                                    </Avatar>
+                                                                    <FormLabel className="font-normal cursor-pointer">{member.user.name}</FormLabel>
+                                                                </div>
+                                                            </FormItem>
+                                                        )
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                    <FormDescription>Tagged members will be notified and can view the task.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <DialogFooter>
                             <Button type="submit" disabled={isLoading}>
                                 {isLoading ? "Updating..." : "Update Task"}

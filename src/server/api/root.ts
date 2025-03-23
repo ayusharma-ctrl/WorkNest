@@ -4,6 +4,7 @@ import { userRouter } from "./routers/user";
 import { invitationRouter } from "./routers/invitation";
 import { projectRouter } from "./routers/project";
 import { taskRouter } from "./routers/task";
+import { notificationRouter } from "./routers/notification";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   invitation: invitationRouter,
   project: projectRouter,
   task: taskRouter,
+  notification: notificationRouter,
 });
 
 // export type definition of API

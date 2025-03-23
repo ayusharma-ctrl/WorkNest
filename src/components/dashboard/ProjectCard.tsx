@@ -28,7 +28,7 @@ export function ProjectCard({ project, taskCount, memberCount }: ProjectCardProp
                             <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/projects/${project.id}/edit`}>Edit Project</Link>
+                            <Link href={`/dashboard/projects/${project.id}/settings`}>Edit Project</Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
