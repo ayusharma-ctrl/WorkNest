@@ -91,3 +91,57 @@ export const statuses: { id: ProjectStatus; name: string }[] = [
     { id: "IN_PROGRESS", name: "In Progress" },
     { id: "DONE", name: "Done" },
 ];
+
+// helper function to pick css based on task priority
+export const getPriorityColor = (priority: string) => {
+    switch (priority) {
+        case "LOW":
+            return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+        case "MEDIUM":
+            return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+        case "HIGH":
+            return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300"
+        case "URGENT":
+            return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+        default:
+            return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+    }
+}
+
+// helper function to get activity type icon based on type
+export const getActivityIcon = (type: string) => {
+    switch (type) {
+        case "TASK_CREATED":
+            return "🆕"
+        case "TASK_UPDATED":
+            return "✏️"
+        case "TASK_DELETED":
+            return "🗑️"
+        case "TASK_STATUS_CHANGED":
+            return "🔄"
+        case "TASK_ASSIGNED":
+            return "👤"
+        case "TASK_TAGGED":
+            return "🏷️"
+        default:
+            return "📝"
+    }
+}
+
+// helper function to get notification type icon based on type
+export const getNotificationIcon = (type: string) => {
+    switch (type) {
+        case "TASK_ASSIGNED":
+            return "🎯"
+        case "TASK_TAGGED":
+            return "🏷️"
+        case "INVITATION_RECEIVED":
+            return "✉️"
+        case "INVITATION_ACCEPTED":
+            return "✅"
+        case "TASK_DUE_SOON":
+            return "⏰"
+        default:
+            return "📢"
+    }
+}

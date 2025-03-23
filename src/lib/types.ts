@@ -1,4 +1,4 @@
-import { type Task, type ProjectMember, type User, type Invitation, type Project } from "@prisma/client"
+import { type Task, type ProjectMember, type User, type Invitation, type Project, type TaskTag } from "@prisma/client"
 
 export interface ProjectPageProps {
     params: Promise<{ projectId: string }>;
@@ -8,9 +8,14 @@ interface Members extends ProjectMember {
     user: User
 }
 
+interface TaskTagWithUser extends TaskTag {
+    user: User
+}
+
 interface TaskWithUser extends Task {
     assignedTo?: User | null;
     createdBy?: User | null;
+    tags?: TaskTagWithUser[] | null;
 }
 
 export interface TaskBoardProps {
@@ -31,7 +36,7 @@ export interface AddTaskDialogProps {
 export interface EditTaskDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    task: Task
+    task: TaskWithUser
     projectId: string
     members: Members[]
     onUpdate: (task: Task) => void

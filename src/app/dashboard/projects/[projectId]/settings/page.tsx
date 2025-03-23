@@ -64,7 +64,7 @@ export default function ProjectSettingsPage({ params }: ProjectSettingsPageProps
                     return;
                 }
                 setProjectId(projectId);
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
             }
         }
@@ -77,7 +77,10 @@ export default function ProjectSettingsPage({ params }: ProjectSettingsPageProps
     // Fetch project details
     const { data: project, isLoading: isProjectLoading } = api.project.getById.useQuery({
         projectId: projectId,
-    });
+    }, {
+        enabled: !!projectId,
+    }
+    );
 
     // Check if user is the owner
     const { data: session } = api.user.getSession.useQuery();

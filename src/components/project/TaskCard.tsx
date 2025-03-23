@@ -21,11 +21,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { type TaskCardProps } from "@/lib/types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TaskActivityFeed } from "./TaskActivityFeed";
 
 
 export function TaskCard({ task, projectId, members, isAdmin, onDelete, onUpdate }: TaskCardProps) {
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+    const [isActivityOpen, setIsActivityOpen] = useState<boolean>(false);
 
     // method to delete a task
     const deleteTask = api.task.delete.useMutation({
@@ -81,6 +85,7 @@ export function TaskCard({ task, projectId, members, isAdmin, onDelete, onUpdate
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setIsActivityOpen(true)}>View Activity</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Edit Task</DropdownMenuItem>
                                 {canEdit && (
                                     <DropdownMenuItem
@@ -94,6 +99,7 @@ export function TaskCard({ task, projectId, members, isAdmin, onDelete, onUpdate
                         </DropdownMenu>
                     </div>
                 </CardHeader>
+
                 <CardContent className="p-3">
                     <div className="flex flex-wrap gap-2 mb-2">
                         <Badge variant="outline" className={getPriorityColor(task.priority)}>
@@ -107,17 +113,55 @@ export function TaskCard({ task, projectId, members, isAdmin, onDelete, onUpdate
                     )}
                     <p className="text-sm text-muted-foreground line-clamp-2">{task.description ?? "No description provided."}</p>
                 </CardContent>
-                <CardFooter className="p-3 pt-0 flex justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center">
-                        <Calendar className="mr-1 h-3.5 w-3.5" />
-                        <span>{formatDistanceToNow(new Date(task.deadline), { addSuffix: true })}</span>
-                    </div>
-                    {task?.assignedTo && (
+
+                <CardFooter className="flex flex-col-reverse p-0 mb-2 gap-2">
+
+                    <div className="p-2 pt-0 flex justify-between text-xs text-muted-foreground w-full">
                         <div className="flex items-center">
-                            <User2 className="mr-1 h-3.5 w-3.5" />
-                            <span>{task.assignedTo.name}</span>
+                            <Calendar className="mr-1 h-3.5 w-3.5" />
+                            <span>{formatDistanceToNow(new Date(task.deadline), { addSuffix: true })}</span>
                         </div>
-                    )}
+                        {task?.assignedTo && (
+                            <div className="flex items-center">
+                                <User2 className="mr-1 h-3.5 w-3.5" />
+                                <span>{task.assignedTo.name}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-end items-center gap-1 w-full px-2">
+                        {task.tags && task.tags.length > 0 && task.tags.slice(0, 3).map((tag) => (
+                            <TooltipProvider key={tag.id}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Avatar className="h-5 w-5">
+                                            <AvatarImage src={tag.user.image ?? ""} alt={tag.user.name ?? "User"} />
+                                            <AvatarFallback className="text-[10px]">{tag.user.name?.charAt(0) ?? "U"}</AvatarFallback>
+                                        </Avatar>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Tagged: {tag.user.name}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        ))}
+
+                        {task.tags && task.tags.length > 3 && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Badge variant="outline" className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                                            +{task.tags.length - 3}
+                                        </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{task.tags.length - 3} more tagged users</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )}
+                    </div>
+
                 </CardFooter>
             </Card>
 
@@ -144,6 +188,21 @@ export function TaskCard({ task, projectId, members, isAdmin, onDelete, onUpdate
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                         </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={isActivityOpen} onOpenChange={setIsActivityOpen}>
+                <AlertDialogContent className="max-w-3xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Task Activity</AlertDialogTitle>
+                        <AlertDialogDescription>View the activity history for this task.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto">
+                        <TaskActivityFeed taskId={task.id} />
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Close</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
